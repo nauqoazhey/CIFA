@@ -224,40 +224,12 @@ def do_test(test_loader,  model, device, best_model_path, epoch, train_loaders_s
 def main(idx, dataclass):
     epochs = args.ep
     batch_size = args.bs
-
-    if dataclass in ['uav']:
-        datasets_list = ['A', 'B', 'C']
-    dataset_idx = list(range(len(datasets_list)))
-    tgt_idx = [idx]
-    src_idx = [i for i in dataset_idx if not tgt_idx.__contains__(i)]
-
-    datasets_tgt = [datasets_list[i] for i in tgt_idx]
-    datasets_src = [datasets_list[i] for i in src_idx]
-
-    datasets_train_src = [ReadData(dataset, dataclass) for dataset in datasets_src]
-    datasets_test_src = [ReadData(dataset, dataclass) for dataset in datasets_tgt]
-
-    dataset_train1 = SimpleDataset(datasets_train_src[0])
-    dataset_train2 = SimpleDataset(datasets_train_src[1])
-    dataset_test = SimpleDataset(datasets_test_src[0])
-
-    balanced_sampler1 = BalancedBatchSampler(dataset_train1.get_class_labels(), batch_size)
-    balanced_sampler2 = BalancedBatchSampler(dataset_train2.get_class_labels(), batch_size)
-
-    train_loader1 = DataLoader(dataset_train1, batch_sampler=balanced_sampler1)
-    train_loader2 = DataLoader(dataset_train2, batch_sampler=balanced_sampler2)
-    dataloader_params_test = dict(batch_size=batch_size, shuffle=False, drop_last=False, pin_memory=False)
-    test_loader = DataLoader(dataset_test, **dataloader_params_test)
-    train_loaders_src = [train_loader1, train_loader2]
-    target_iter = iter(test_loader)
-
-    if dataclass in ['uav', 'uav_or']:
-        num_classes = 3
+    if dataclass in ['', '']:
+        num_classes = 
         model = BINNet(num_classes)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
     cls_optimizer = torch.optim.Adam(list(model.parameters()), lr=0.00005)
-    mmd_loss = MMD_loss(kernel_type='rbf', kernel_mul=2.0, kernel_num=5)
     out_dir = "./output/"
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
@@ -268,4 +240,5 @@ def main(idx, dataclass):
 if __name__ == '__main__':
     args = args_parser()
     main(args.test, args.dataset)
+
 
